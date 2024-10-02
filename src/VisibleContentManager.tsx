@@ -50,8 +50,7 @@ export const VisibleContentManager = ({
           display: "flex",
           overflow: "hidden",
           maxWidth: `${containerWidthPercentage}%`,
-          gap: "8px",
-          height: "24px",
+          gap: "8px", 
           visibility: "hidden", // Render invisibly
           position: "absolute", // Remove from layout
         }}
