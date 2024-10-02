@@ -1,89 +1,123 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 
 export const VisibleContentManager = ({
   children,
   containerWidthPercentage = 85,
+  gapWidth = 8,
+  HiddenChildrenContainer,
 }: {
   children: React.ReactNode[];
   containerWidthPercentage?: number;
+  gapWidth?: number;
+  HiddenChildrenContainer?: React.ReactNode;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [visibleChildren, setVisibleChildren] = useState<any>([]);
+  const [visibleChildren, setVisibleChildren] = useState<React.ReactNode[]>([]);
   const [hiddenCount, setHiddenCount] = useState(0);
 
-  useEffect(() => {
-    if (containerRef.current) {
-      let containerWidth =
-        (containerWidthPercentage / 100) *
-        containerRef.current.parentElement!.offsetWidth;
-      let visible = 0;
-      let hidden = 0;
-      React.Children?.forEach(children, (child, i) => {
-        const childWidth =
-          containerRef.current?.children[i].getBoundingClientRect().width + 8;
-        if (childWidth) {
-          if (childWidth <= containerWidth) {
-            visible++;
-            containerWidth -= childWidth;
-          } else {
-            hidden += 1;
-          }
-        }
-      });
-      setVisibleChildren(children.slice(0, visible));
-      setHiddenCount(hidden);
+  const updateVisibleChildren = useCallback(() => {
+    if (!containerRef.current) return;
+
+    const parentWidth =
+      (containerWidthPercentage / 100) * containerRef.current.parentElement!.offsetWidth;
+    
+    let availableWidth = parentWidth;
+    let visible = 0;
+    let hidden = 0;
+
+    const childWidths = Array.from(containerRef.current.children).map(
+      (child) => child.getBoundingClientRect().width + gapWidth // Add dynamic gap width
+    );
+
+    for (let i = 0; i < childWidths.length; i++) {
+      if (childWidths[i] <= availableWidth) {
+        visible++;
+        availableWidth -= childWidths[i];
+      } else {
+        hidden++;
+      }
     }
-  }, [children, containerWidthPercentage]);
+
+    setVisibleChildren(children.slice(0, visible));
+    setHiddenCount(hidden);
+  }, [children, containerWidthPercentage, gapWidth]);
+
+  useEffect(() => {
+    updateVisibleChildren();
+  }, [children, updateVisibleChildren]);
+
+  useEffect(() => {
+    // Use ResizeObserver to detect parent width changes and update visible children
+    const resizeObserver = new ResizeObserver(() => {
+      updateVisibleChildren();
+    });
+
+    if (containerRef.current?.parentElement) {
+      resizeObserver.observe(containerRef.current.parentElement);
+    }
+
+    return () => {
+      if (containerRef.current?.parentElement) {
+        resizeObserver.unobserve(containerRef.current.parentElement);
+      }
+    };
+  }, [updateVisibleChildren]);
 
   return (
     <div
       style={{
         display: "flex",
-        gap: "8px",
+        gap: `${gapWidth}px`,
         width: "100%",
+        overflow: "hidden",
       }}
     >
-      {/* Render all children invisibly for measurement */}
+      {/* Invisible container for measurement */}
       <div
         ref={containerRef}
         style={{
           display: "flex",
-          overflow: "hidden",
-          maxWidth: `${containerWidthPercentage}%`,
-          gap: "8px", 
-          visibility: "hidden", // Render invisibly
-          position: "absolute", // Remove from layout
+          visibility: "hidden",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: `${containerWidthPercentage}%`,
+          gap: `${gapWidth}px`,
         }}
       >
         {children}
       </div>
-      {/* Render visible children normally */}
+
+      {/* Visible children */}
       <div
         style={{
           display: "flex",
-          overflow: "hidden",
           maxWidth: `${containerWidthPercentage}%`,
-          gap: "8px",
+          gap: `${gapWidth}px`,
         }}
       >
         {visibleChildren}
       </div>
-      {/* Hidden children count */}
+
+      {/* Hidden children container */}
       {hiddenCount > 0 && (
-        <div
-          style={{
-            width: "24px",
-            height: "24px",
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            borderRadius: "50%",
-            backgroundColor: "#E0E0E0", // You can change the background color if needed
-          }}
-        >
-          {`+${hiddenCount}`}
-        </div>
+        HiddenChildrenContainer ? (
+          HiddenChildrenContainer
+        ) : (
+          <div
+            style={{
+              width: "24px",
+              height: "24px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "50%",
+              backgroundColor: "#E0E0E0",
+            }}
+          >
+            {`+${hiddenCount}`}
+          </div>
+        )
       )}
     </div>
   );
