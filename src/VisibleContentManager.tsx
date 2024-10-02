@@ -4,12 +4,12 @@ export const VisibleContentManager = ({
   children,
   containerWidthPercentage = 85,
   gapWidth = 8,
-  HiddenChildrenContainer,
+  HiddenChildrenContainerStyle,
 }: {
   children: React.ReactNode[];
   containerWidthPercentage?: number;
   gapWidth?: number;
-  HiddenChildrenContainer?: React.ReactNode;
+  HiddenChildrenContainerStyle?: object;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleChildren, setVisibleChildren] = useState<React.ReactNode[]>([]);
@@ -100,10 +100,7 @@ export const VisibleContentManager = ({
       </div>
 
       {/* Hidden children container */}
-      {hiddenCount > 0 && (
-        HiddenChildrenContainer ? (
-          HiddenChildrenContainer
-        ) : (
+      {hiddenCount > 0 && ( 
           <div
             style={{
               width: "24px",
@@ -113,11 +110,11 @@ export const VisibleContentManager = ({
               justifyContent: "center",
               borderRadius: "50%",
               backgroundColor: "#E0E0E0",
+              ...HiddenChildrenContainerStyle
             }}
           >
             {`+${hiddenCount}`}
-          </div>
-        )
+          </div> 
       )}
     </div>
   );
