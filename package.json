@@ -1,13 +1,23 @@
 {
   "name": "visible-content-manager",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
      "build": "tsc"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "react",
+    "component",
+    "visibility",
+    "responsive",
+    "layout",
+    "overflow",
+    "flexbox",
+    "dynamic rendering",
+    "overflow management"
+  ],
+  "author": "Syed Yaser Mohasin", 
   "license": "ISC",
   "description": "",
   "dependencies": {
