@@ -9,7 +9,7 @@ export const VisibleContentManager = ({
   children: React.ReactNode[];
   containerWidthPercentage?: number;
   gapWidth?: number;
-  HiddenChildrenContainerStyle?: object;
+  HiddenChildrenContainerStyle?: Object;
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleChildren, setVisibleChildren] = useState<React.ReactNode[]>([]);
@@ -20,23 +20,27 @@ export const VisibleContentManager = ({
 
     const parentWidth =
       (containerWidthPercentage / 100) * containerRef.current.parentElement!.offsetWidth;
-    
+
     let availableWidth = parentWidth;
     let visible = 0;
     let hidden = 0;
 
-    const childWidths = Array.from(containerRef.current.children).map(
-      (child) => child.getBoundingClientRect().width + gapWidth // Add dynamic gap width
-    );
+    // Use a loop to get child widths
+    React.Children.forEach(children, (child) => {
+      if (React.isValidElement(child) && containerRef.current) {
+        // Assert the type of child
+        const childIndex = React.Children.toArray(children).indexOf(child);
+        const childElement = containerRef.current.children[childIndex] as HTMLElement;
 
-    for (let i = 0; i < childWidths.length; i++) {
-      if (childWidths[i] <= availableWidth) {
-        visible++;
-        availableWidth -= childWidths[i];
-      } else {
-        hidden++;
+        const childWidth = childElement.getBoundingClientRect().width + gapWidth; // Add dynamic gap width
+        if (childWidth <= availableWidth) {
+          visible++;
+          availableWidth -= childWidth;
+        } else {
+          hidden++;
+        }
       }
-    }
+    });
 
     setVisibleChildren(children.slice(0, visible));
     setHiddenCount(hidden);
@@ -47,7 +51,6 @@ export const VisibleContentManager = ({
   }, [children, updateVisibleChildren]);
 
   useEffect(() => {
-    // Use ResizeObserver to detect parent width changes and update visible children
     const resizeObserver = new ResizeObserver(() => {
       updateVisibleChildren();
     });
@@ -100,7 +103,7 @@ export const VisibleContentManager = ({
       </div>
 
       {/* Hidden children container */}
-      {hiddenCount > 0 && ( 
+      {hiddenCount > 0 &&  
           <div
             style={{
               width: "24px",
@@ -115,7 +118,7 @@ export const VisibleContentManager = ({
           >
             {`+${hiddenCount}`}
           </div> 
-      )}
+       }
     </div>
   );
 };
