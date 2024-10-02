@@ -1,6 +1,6 @@
 {
   "name": "visible-content-manager",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -15,10 +15,11 @@
     "overflow",
     "flexbox",
     "dynamic rendering",
-    "overflow management"
+    "overflow management",
+    "visible-content-manager"
   ],
   "author": "Syed Yaser Mohasin", 
-  "license": "ISC",
+  "license": "MIT",
   "description": "",
   "dependencies": {
     "react": "^18.3.1",
